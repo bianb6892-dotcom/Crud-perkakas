@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool & Service Inventory</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   VARIABEL WARNA
+============================================================ */
+:root {
+  --blue-900:#0b2545; --blue-800:#13315c; --blue-700:#1d4e89; --blue-600:#2563a8;
+  --blue-500:#3b82c4; --blue-400:#6fa8dc; --blue-100:#dbe9f7;
+  --cream-50:#fdfaf4; --cream-100:#faf3e6; --cream-200:#f3e6cf; --cream-300:#e8d3ae;
+  --brown-400:#b58a5c; --brown-500:#96693f; --brown-600:#7a5230;
+  --white:#fff; --gray-400:#98a2b3; --gray-600:#667085; --gray-800:#2c3444;
+  --danger:#d9534f; --danger-dark:#b83b37; --success:#2e9e6b;
+  --radius:14px; --radius-sm:10px;
+  --shadow-sm:0 2px 8px rgba(11,37,69,.06);
+  --shadow-md:0 6px 20px rgba(11,37,69,.10);
+  --shadow-lg:0 14px 40px rgba(11,37,69,.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family:'Plus Jakarta Sans', sans-serif;
+  background:linear-gradient(135deg,var(--cream-100) 0%,var(--cream-50) 60%,var(--blue-100) 100%);
+  background-attachment:fixed;
+  min-height:100vh;
+  color:var(--gray-800);
+  padding:28px 16px 60px;
+}
+
+.app-container { max-width:1150px; margin:0 auto; }
+
+/* ============================================================
+   HEADER
+============================================================ */
+.app-header {
+  background:linear-gradient(135deg,var(--blue-800),var(--blue-600));
+  border-radius:var(--radius);
+  padding:24px 28px;
+  margin-bottom:20px;
+  box-shadow:var(--shadow-lg);
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:16px;
+  color:#fff;
+}
+.app-header::before {
+  content:''; position:absolute; top:-60px; right:-60px;
+  width:200px; height:200px;
+  background:radial-gradient(circle,rgba(181,138,92,.35) 0%,transparent 70%);
+  border-radius:50%;
+}
+.app-header::after {
+  content:''; position:absolute; bottom:-80px; left:20%;
+  width:180px; height:180px;
+  background:radial-gradient(circle,rgba(111,168,220,.25) 0%,transparent 70%);
+  border-radius:50%;
+}
+.header-brand { display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+.brand-icon {
+  width:52px; height:52px;
+  background:linear-gradient(135deg,var(--cream-200),var(--brown-400));
+  border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; color:var(--blue-900);
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+.brand-text h1 { font-size:1.25rem; font-weight:800; letter-spacing:.3px; }
+.brand-text p { font-size:.78rem; opacity:.85; margin-top:2px; }
+
+.header-stats { display:flex; gap:10px; position:relative; z-index:1; }
+.stat-box {
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(6px);
+  border-radius:var(--radius-sm);
+  padding:10px 16px;
+  text-align:center;
+  min-width:80px;
+}
+.stat-box .stat-num { display:block; font-size:1.15rem; font-weight:800; line-height:1.1; }
+.stat-box .stat-label {
+  font-size:.65rem; text-transform:uppercase; letter-spacing:.8px;
+  font-weight:600; opacity:.85;
+}
+
+/* ============================================================
+   TABS
+============================================================ */
+.main-tabs, .page-tabs {
+  display:flex; gap:8px;
+  background:#fff;
+  padding:8px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+  border:1px solid var(--cream-200);
+  margin-bottom:16px;
+}
+.page-tabs { margin-bottom:20px; }
+.main-tab, .tab-btn {
+  flex:1;
+  padding:12px 18px;
+  background:transparent; border:none;
+  border-radius:var(--radius-sm);
+  font-family:inherit; font-size:.9rem; font-weight:700;
+  color:var(--gray-600);
+  cursor:pointer;
+  transition:all .22s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.main-tab:hover, .tab-btn:hover { background:var(--cream-100); color:var(--blue-700); }
+.main-tab.active, .tab-btn.active {
+  background:linear-gradient(135deg,var(--blue-700),var(--blue-600));
+  color:#fff;
+  box-shadow:0 6px 16px rgba(29,78,137,.35);
+}
+.tab-count, .tab-badge {
+  background:rgba(255,255,255,.22);
+  padding:2px 9px; border-radius:20px;
+  font-size:.7rem; font-weight:700;
+}
+.main-tab:not(.active) .tab-count,
+.tab-btn:not(.active) .tab-badge { background:var(--blue-100); color:var(--blue-700); }
+
+/* ============================================================
+   PAGE
+============================================================ */
+.page { display:none; animation:fadeIn .3s; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+.panel {
+  background:#fff;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-md);
+  border:1px solid var(--cream-200);
+  overflow:hidden;
+}
+.panel-header {
+  padding:20px 24px;
+  border-bottom:2px solid var(--cream-100);
+  background:linear-gradient(90deg,var(--cream-50),#fff);
+}
+.panel-header h2 {
+  font-size:1.05rem; font-weight:800; color:var(--blue-800);
+  display:flex; align-items:center; gap:10px;
+}
+.panel-header h2 i {
+  width:34px; height:34px;
+  background:linear-gradient(135deg,var(--blue-600),var(--blue-700));
+  color:#fff; border-radius:9px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:.9rem;
+}
+.panel-header p { font-size:.78rem; color:var(--gray-600); margin-top:2px; }
+.panel-body { padding:24px; }
+
+/* ============================================================
+   FORM
+============================================================ */
+.form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-group.full { grid-column:1/-1; }
+.form-label { font-size:.78rem; font-weight:700; color:var(--blue-800); }
+.form-label .req { color:var(--danger); }
+.form-control, .form-select, .form-textarea {
+  width:100%;
+  padding:11px 14px;
+  background:var(--cream-50);
+  border:1.5px solid var(--cream-300);
+  border-radius:var(--radius-sm);
+  font-family:inherit; font-size:.88rem;
+  color:var(--gray-800);
+  outline:none;
+  transition:all .2s;
+}
+.form-control:focus, .form-select:focus, .form-textarea:focus {
+  background:#fff;
+  border-color:var(--blue-500);
+  box-shadow:0 0 0 4px rgba(59,130,196,.12);
+}
+.form-textarea { resize:vertical; min-height:78px; }
+.form-select { cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='3'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  padding-right:38px;
+}
+
+/* Upload */
+.upload-area {
+  display:flex; align-items:center; gap:16px;
+  padding:16px;
+  background:var(--cream-50);
+  border:2px dashed var(--cream-300);
+  border-radius:var(--radius-sm);
+  transition:all .25s;
+}
+.upload-area:hover { border-color:var(--blue-400); background:var(--blue-100); }
+.upload-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 18px;
+  background:#fff;
+  border:1.5px solid var(--blue-500);
+  color:var(--blue-700);
+  border-radius:var(--radius-sm);
+  font-size:.82rem; font-weight:700;
+  cursor:pointer;
+  transition:all .2s;
+  font-family:inherit;
+}
+.upload-btn:hover { background:var(--blue-700); color:#fff; }
+.upload-btn input { display:none; }
+.upload-preview {
+  width:84px; height:84px;
+  border-radius:var(--radius-sm);
+  object-fit:cover;
+  border:2px solid var(--cream-300);
+  background:#fff;
+  display:none;
+}
+.upload-preview.show { display:block; }
+.upload-hint { font-size:.72rem; color:var(--gray-600); line-height:1.5; }
+.upload-hint strong { color:var(--brown-500); }
+.upload-clear {
+  background:none; border:none;
+  color:var(--danger);
+  font-size:.75rem; font-weight:700;
+  cursor:pointer;
+  padding:4px 8px;
+  border-radius:6px;
+  display:none;
+  font-family:inherit;
+}
+.upload-clear.show { display:inline-block; }
+.upload-clear:hover { background:rgba(217,83,79,.1); }
+
+/* Buttons */
+.btn {
+  padding:12px 22px;
+  border:none; border-radius:var(--radius-sm);
+  font-family:inherit; font-size:.88rem; font-weight:700;
+  cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:all .22s;
+}
+.btn-primary {
+  background:linear-gradient(135deg,var(--blue-700),var(--blue-600));
+  color:#fff;
+  box-shadow:0 6px 16px rgba(29,78,137,.32);
+}
+.btn-primary:hover {
+  box-shadow:0 10px 22px rgba(29,78,137,.42);
+  transform:translateY(-2px);
+}
+.btn-secondary {
+  background:#fff;
+  border:1.5px solid var(--cream-300);
+  color:var(--gray-800);
+}
+.btn-secondary:hover { background:var(--cream-100); border-color:var(--brown-400); color:var(--brown-600); }
+.btn-danger { background:var(--danger); color:#fff; }
+.btn-danger:hover { background:var(--danger-dark); }
+
+.form-actions {
+  display:flex; gap:10px; justify-content:flex-end;
+  margin-top:22px; padding-top:18px;
+  border-top:1.5px dashed var(--cream-300);
+}
+
+/* ============================================================
+   TOOLBAR
+============================================================ */
+.toolbar {
+  display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+  padding:18px 24px;
+  background:var(--cream-50);
+  border-bottom:1.5px solid var(--cream-200);
+}
+.search-box { position:relative; flex:1; min-width:220px; }
+.search-box i {
+  position:absolute; left:14px; top:50%;
+  transform:translateY(-50%);
+  color:var(--blue-500); font-size:.82rem;
+}
+.search-box input {
+  width:100%;
+  padding:10px 14px 10px 38px;
+  background:#fff;
+  border:1.5px solid var(--cream-300);
+  border-radius:var(--radius-sm);
+  font-family:inherit; font-size:.85rem;
+  outline:none;
+}
+.search-box input:focus {
+  border-color:var(--blue-500);
+  box-shadow:0 0 0 4px rgba(59,130,196,.12);
+}
+.filter-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.chip {
+  padding:8px 14px;
+  background:#fff;
+  border:1.5px solid var(--cream-300);
+  border-radius:20px;
+  font-family:inherit; font-size:.76rem; font-weight:700;
+  color:var(--gray-600);
+  cursor:pointer;
+  transition:all .2s;
+}
+.chip:hover { border-color:var(--blue-400); color:var(--blue-700); }
+.chip.active {
+  background:linear-gradient(135deg,var(--blue-700),var(--blue-600));
+  color:#fff; border-color:var(--blue-700);
+}
+
+/* ============================================================
+   GRID CARD
+============================================================ */
+.tools-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:18px;
+  padding:22px 24px;
+}
+.tool-card {
+  background:#fff;
+  border:1.5px solid var(--cream-200);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  transition:all .28s;
+  display:flex; flex-direction:column;
+  position:relative;
+}
+.tool-card:hover {
+  transform:translateY(-4px);
+  box-shadow:var(--shadow-lg);
+  border-color:var(--blue-400);
+}
+.tool-image {
+  width:100%; aspect-ratio:4/3;
+  background:linear-gradient(135deg,var(--cream-100),var(--blue-100));
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; position:relative;
+}
+.tool-image img {
+  width:100%; height:100%; object-fit:cover;
+  transition:transform .4s;
+}
+.tool-card:hover .tool-image img { transform:scale(1.06); }
+.tool-image .placeholder { font-size:3rem; color:var(--blue-400); opacity:.6; }
+.tool-badge {
+  position:absolute; top:10px; right:10px;
+  padding:4px 10px; border-radius:20px;
+  font-size:.65rem; font-weight:800;
+  text-transform:uppercase; letter-spacing:.5px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.badge-baik, .badge-tersedia { background:#d4f0e2; color:#1d6b47; }
+.badge-rusak, .badge-libur { background:#fde2e0; color:#a13330; }
+.badge-perbaikan, .badge-booking { background:#fff3d1; color:#966a1f; }
+
+.tool-body {
+  padding:16px;
+  display:flex; flex-direction:column; gap:8px;
+  flex:1;
+}
+.tool-name {
+  font-size:1rem; font-weight:800;
+  color:var(--blue-800); line-height:1.3;
+  word-break:break-word;
+}
+.tool-category {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:.7rem; font-weight:700;
+  color:var(--brown-600);
+  background:var(--cream-100);
+  border:1px solid var(--cream-300);
+  padding:3px 10px; border-radius:20px;
+  width:fit-content;
+  text-transform:uppercase; letter-spacing:.4px;
+}
+.tool-price {
+  font-size:1.15rem; font-weight:800;
+  color:var(--brown-600); margin-top:2px;
+}
+.tool-price small { font-size:.72rem; font-weight:600; color:var(--gray-600); margin-left:2px; }
+.tool-info {
+  font-size:.78rem; color:var(--gray-600);
+  line-height:1.6;
+  display:flex; flex-direction:column; gap:3px;
+  margin-top:4px; padding-top:8px;
+  border-top:1px dashed var(--cream-300);
+}
+.tool-info span { display:flex; align-items:center; gap:7px; }
+.tool-info i { color:var(--blue-500); width:14px; font-size:.72rem; }
+.tool-actions {
+  display:flex; gap:8px;
+  padding:12px 16px;
+  background:var(--cream-50);
+  border-top:1.5px solid var(--cream-200);
+}
+.btn-card {
+  flex:1;
+  padding:8px 12px;
+  border-radius:8px; border:none;
+  font-family:inherit; font-size:.76rem; font-weight:700;
+  cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  transition:all .2s;
+}
+.btn-edit { background:var(--blue-100); color:var(--blue-700); }
+.btn-edit:hover { background:var(--blue-700); color:#fff; }
+.btn-delete { background:#fde2e0; color:var(--danger); }
+.btn-delete:hover { background:var(--danger); color:#fff; }
+
+/* Empty State */
+.empty-state { text-align:center; padding:60px 24px; display:none; }
+.empty-state.show { display:block; }
+.empty-icon {
+  width:90px; height:90px;
+  margin:0 auto 16px;
+  background:linear-gradient(135deg,var(--cream-100),var(--blue-100));
+  border:2px dashed var(--cream-300);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; color:var(--blue-500);
+}
+.empty-state h3 { font-size:1.05rem; font-weight:800; color:var(--blue-800); margin-bottom:6px; }
+.empty-state p {
+  font-size:.82rem; color:var(--gray-600);
+  max-width:340px; margin:0 auto 18px; line-height:1.6;
+}
+
+/* Toast */
+.toast-wrap {
+  position:fixed; bottom:24px; right:24px;
+  z-index:1000;
+  display:flex; flex-direction:column; gap:10px;
+  pointer-events:none;
+}
+.toast {
+  display:flex; align-items:center; gap:12px;
+  background:#fff;
+  border-left:4px solid var(--blue-600);
+  border-radius:var(--radius-sm);
+  padding:14px 18px;
+  box-shadow:var(--shadow-lg);
+  min-width:260px; max-width:380px;
+  pointer-events:auto;
+  animation:slideIn .35s cubic-bezier(.22,1,.36,1);
+}
+.toast.success { border-left-color:var(--success); }
+.toast.danger { border-left-color:var(--danger); }
+.toast.info { border-left-color:var(--blue-600); }
+.toast .icon {
+  width:32px; height:32px;
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.9rem; flex-shrink:0;
+}
+.toast.success .icon { background:#d4f0e2; color:var(--success); }
+.toast.danger .icon { background:#fde2e0; color:var(--danger); }
+.toast.info .icon { background:var(--blue-100); color:var(--blue-700); }
+.toast .msg { font-size:.82rem; font-weight:600; color:var(--gray-800); line-height:1.4; }
+.toast .msg small {
+  display:block; font-weight:500; color:var(--gray-600);
+  font-size:.72rem; margin-top:2px;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(40px);} to{opacity:1;transform:translateX(0);} }
+
+/* Modal */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(11,37,69,.55);
+  backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center;
+  z-index:999; padding:20px;
+}
+.modal-overlay.show { display:flex; }
+.modal {
+  background:#fff;
+  border-radius:var(--radius);
+  max-width:400px; width:100%;
+  padding:26px; text-align:center;
+  box-shadow:var(--shadow-lg);
+  animation:popIn .28s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { from{opacity:0;transform:scale(.9);} to{opacity:1;transform:scale(1);} }
+.modal-icon {
+  width:64px; height:64px;
+  margin:0 auto 14px;
+  background:#fde2e0; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem; color:var(--danger);
+}
+.modal h3 { font-size:1.05rem; font-weight:800; color:var(--blue-800); margin-bottom:8px; }
+.modal p { font-size:.85rem; color:var(--gray-600); line-height:1.6; margin-bottom:22px; }
+.modal p strong { color:var(--blue-700); }
+.modal-actions { display:flex; gap:10px; }
+.modal-actions .btn { flex:1; }
+
+/* Responsive */
+@media (max-width:640px) {
+  body { padding:16px 10px 40px; }
+  .app-header { padding:18px 20px; }
+  .brand-text h1 { font-size:1.05rem; }
+  .brand-icon { width:44px; height:44px; font-size:1.1rem; }
+  .header-stats { width:100%; }
+  .stat-box { flex:1; }
+  .form-grid { grid-template-columns:1fr; }
+  .panel-body { padding:18px; }
+  .tab-btn span.tab-text, .main-tab span.main-tab-text { display:none; }
+  .toast-wrap { left:16px; right:16px; bottom:16px; }
+  .toast { min-width:auto; }
+  .tools-grid { grid-template-columns:1fr 1fr; gap:12px; padding:16px; }
+  .tool-body { padding:12px; }
+  .tool-actions { padding:10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-icon"><i class="fa-solid fa-toolbox"></i></div>
+      <div class="brand-text">
+        <h1>Tool &amp; Service Inventory</h1>
+        <p>Pendataan Alat Perkakas &amp; Jasa</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="stat-box"><span class="stat-num" id="stat-total">0</span><span class="stat-label">Total Alat</span></div>
+      <div class="stat-box"><span class="stat-num" id="stat-baik">0</span><span class="stat-label">Baik</span></div>
+      <div class="stat-box"><span class="stat-num" id="stat-rusak">0</span><span class="stat-label">Rusak</span></div>
+    </div>
+  </header>
+
+  <!-- MAIN TABS -->
+  <nav class="main-tabs">
+    <button class="main-tab active" id="main-tab-alat" onclick="switchMainTab('alat')">
+      <i class="fa-solid fa-screwdriver-wrench"></i>
+      <span class="main-tab-text">Alat Perkakas</span>
+      <span class="tab-count" id="count-alat">0</span>
+    </button>
+    <button class="main-tab" id="main-tab-jasa" onclick="switchMainTab('jasa')">
+      <i class="fa-solid fa-hand-holding-dollar"></i>
+      <span class="main-tab-text">Jasa</span>
+      <span class="tab-count" id="count-jasa">0</span>
+    </button>
+  </nav>
+
+  <!-- SUB TABS ALAT -->
+  <nav class="page-tabs" id="sub-tabs-alat">
+    <button class="tab-btn active" id="sub-alat-form" onclick="switchAlatPage('form')">
+      <i class="fa-solid fa-circle-plus"></i><span class="tab-text">Tambah Alat</span>
+    </button>
+    <button class="tab-btn" id="sub-alat-view" onclick="switchAlatPage('view')">
+      <i class="fa-solid fa-boxes-stacked"></i><span class="tab-text">Daftar Alat</span>
+      <span class="tab-badge" id="tab-count-alat">0</span>
+    </button>
+  </nav>
+
+  <!-- SUB TABS JASA -->
+  <nav class="page-tabs" id="sub-tabs-jasa" style="display:none;">
+    <button class="tab-btn active" id="sub-jasa-form" onclick="switchJasaPage('form')">
+      <i class="fa-solid fa-circle-plus"></i><span class="tab-text">Tambah Jasa</span>
+    </button>
+    <button class="tab-btn" id="sub-jasa-view" onclick="switchJasaPage('view')">
+      <i class="fa-solid fa-boxes-stacked"></i><span class="tab-text">Daftar Jasa</span>
+      <span class="tab-badge" id="tab-count-jasa">0</span>
+    </button>
+  </nav>
+
+  <!-- SECTION ALAT -->
+  <div id="section-alat">
+
+    <section class="page active" id="alat-page-form">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 id="alat-form-title"><i class="fa-solid fa-circle-plus"></i> Tambah Alat Baru</h2>
+            <p id="alat-form-subtitle">Isi data alat perkakas dengan lengkap</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form id="tool-form" onsubmit="handleSubmit(event)">
+            <input type="hidden" id="edit-id" value="">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Nama Alat <span class="req">*</span></label>
+                <input type="text" id="input-name" class="form-control" placeholder="Contoh: Tang Kombinasi" required maxlength="80">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kategori <span class="req">*</span></label>
+                <select id="input-category" class="form-select" required>
+                  <option value="">-- Pilih Kategori --</option>
+                  <option value="Alat Tangan">🔨 Alat Tangan</option>
+                  <option value="Alat Listrik">⚡ Alat Listrik</option>
+                  <option value="Alat Ukur">📏 Alat Ukur</option>
+                  <option value="Alat Potong">✂️ Alat Potong</option>
+                  <option value="Alat Pengencang">🔩 Alat Pengencang</option>
+                  <option value="Peralatan Safety">🦺 Peralatan Safety</option>
+                  <option value="Lainnya">📦 Lainnya</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Merek</label>
+                <input type="text" id="input-brand" class="form-control" placeholder="Tekiro, Bosch, dll" maxlength="50">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Jumlah Stok <span class="req">*</span></label>
+                <input type="number" id="input-quantity" class="form-control" min="1" value="1" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kondisi <span class="req">*</span></label>
+                <select id="input-condition" class="form-select" required>
+                  <option value="Baik">✅ Baik</option>
+                  <option value="Perbaikan">⚠️ Perlu Perbaikan</option>
+                  <option value="Rusak">❌ Rusak</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lokasi</label>
+                <input type="text" id="input-location" class="form-control" placeholder="Lemari A - Rak 2" maxlength="60">
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Catatan</label>
+                <textarea id="input-notes" class="form-textarea" placeholder="Catatan tambahan (opsional)" maxlength="300"></textarea>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Foto Alat</label>
+                <div class="upload-area">
+                  <img id="img-preview" class="upload-preview" alt="Preview">
+                  <div style="flex:1; min-width:0;">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:6px;">
+                      <label class="upload-btn">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Pilih Foto
+                        <input type="file" id="input-image" accept="image/*">
+                      </label>
+                      <button type="button" class="upload-clear" id="btn-clear-img">
+                        <i class="fa-solid fa-xmark"></i> Hapus Foto
+                      </button>
+                    </div>
+                    <p class="upload-hint">Format: JPG, PNG, WEBP. Ukuran maks <strong>2MB</strong>.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="btn-cancel" onclick="cancelEdit()" style="display:none;">
+                <i class="fa-solid fa-xmark"></i> Batal
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetFormFully()">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+              <button type="submit" class="btn btn-primary" id="btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span id="btn-submit-text">Simpan Alat</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="alat-page-view">
+      <div class="panel">
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Cari alat..." oninput="handleSearch()">
+          </div>
+          <div class="filter-chips">
+            <button class="chip active" data-filter="Semua" onclick="setFilter('Semua')">Semua</button>
+            <button class="chip" data-filter="Baik" onclick="setFilter('Baik')">Baik</button>
+            <button class="chip" data-filter="Perbaikan" onclick="setFilter('Perbaikan')">Perbaikan</button>
+            <button class="chip" data-filter="Rusak" onclick="setFilter('Rusak')">Rusak</button>
+          </div>
+          <button class="btn btn-primary" onclick="switchAlatPage('form')" style="padding:10px 16px; font-size:.82rem;">
+            <i class="fa-solid fa-plus"></i> Tambah
+          </button>
+        </div>
+        <div class="tools-grid" id="tools-grid"></div>
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon"><i class="fa-solid fa-toolbox"></i></div>
+          <h3 id="empty-title">Belum Ada Alat Terdaftar</h3>
+          <p id="empty-desc">Mulai dengan menambahkan alat perkakas pertama Anda.</p>
+          <button class="btn btn-primary" onclick="switchAlatPage('form')">
+            <i class="fa-solid fa-circle-plus"></i> Tambah Alat Pertama
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- SECTION JASA -->
+  <div id="section-jasa" style="display:none;">
+
+    <section class="page active" id="jasa-page-form">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 id="jasa-form-title"><i class="fa-solid fa-circle-plus"></i> Tambah Jasa Baru</h2>
+            <p id="jasa-form-subtitle">Isi data layanan jasa dengan lengkap</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form id="jasa-form" onsubmit="handleJasaSubmit(event)">
+            <input type="hidden" id="jasa-edit-id" value="">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Nama Jasa <span class="req">*</span></label>
+                <input type="text" id="jasa-name" class="form-control" placeholder="Contoh: Servis Bor Listrik" required maxlength="80">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kategori <span class="req">*</span></label>
+                <select id="jasa-category" class="form-select" required>
+                  <option value="">-- Pilih Kategori --</option>
+                  <option value="Perbaikan Alat">🔧 Perbaikan Alat</option>
+                  <option value="Instalasi">⚡ Instalasi</option>
+                  <option value="Perawatan">🛠️ Perawatan</option>
+                  <option value="Konsultasi">💬 Konsultasi</option>
+                  <option value="Pemasangan">🔩 Pemasangan</option>
+                  <option value="Lainnya">📦 Lainnya</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Teknisi</label>
+                <input type="text" id="jasa-technician" class="form-control" placeholder="Pak Budi" maxlength="50">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Harga (Rp) <span class="req">*</span></label>
+                <input type="number" id="jasa-price" class="form-control" placeholder="75000" min="0" step="1000" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Satuan</label>
+                <select id="jasa-unit" class="form-select">
+                  <option value="per unit">per unit</option>
+                  <option value="per jam">per jam</option>
+                  <option value="per hari">per hari</option>
+                  <option value="per proyek">per proyek</option>
+                  <option value="per kunjungan">per kunjungan</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Status <span class="req">*</span></label>
+                <select id="jasa-status" class="form-select" required>
+                  <option value="Tersedia">✅ Tersedia</option>
+                  <option value="Booking">📅 Booking</option>
+                  <option value="Libur">❌ Libur</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lokasi</label>
+                <input type="text" id="jasa-location" class="form-control" placeholder="Workshop / On-site" maxlength="60">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Durasi</label>
+                <input type="text" id="jasa-duration" class="form-control" placeholder="1-2 jam" maxlength="30">
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Deskripsi</label>
+                <textarea id="jasa-notes" class="form-textarea" placeholder="Detail layanan (opsional)" maxlength="300"></textarea>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Foto Jasa</label>
+                <div class="upload-area">
+                  <img id="jasa-img-preview" class="upload-preview" alt="Preview">
+                  <div style="flex:1; min-width:0;">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:6px;">
+                      <label class="upload-btn">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Pilih Foto
+                        <input type="file" id="jasa-input-image" accept="image/*">
+                      </label>
+                      <button type="button" class="upload-clear" id="jasa-btn-clear-img">
+                        <i class="fa-solid fa-xmark"></i> Hapus Foto
+                      </button>
+                    </div>
+                    <p class="upload-hint">Format: JPG, PNG, WEBP. Ukuran maks <strong>2MB</strong>.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="jasa-btn-cancel" onclick="cancelJasaEdit()" style="display:none;">
+                <i class="fa-solid fa-xmark"></i> Batal
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetJasaForm()">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+              <button type="submit" class="btn btn-primary" id="jasa-btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span id="jasa-btn-submit-text">Simpan Jasa</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="jasa-page-view">
+      <div class="panel">
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="jasa-search-input" placeholder="Cari jasa..." oninput="handleJasaSearch()">
+          </div>
+          <div class="filter-chips">
+            <button class="chip active" data-jasa-filter="Semua" onclick="setJasaFilter('Semua')">Semua</button>
+            <button class="chip" data-jasa-filter="Tersedia" onclick="setJasaFilter('Tersedia')">Tersedia</button>
+            <button class="chip" data-jasa-filter="Booking" onclick="setJasaFilter('Booking')">Booking</button>
+            <button class="chip" data-jasa-filter="Libur" onclick="setJasaFilter('Libur')">Libur</button>
+          </div>
+          <button class="btn btn-primary" onclick="switchJasaPage('form')" style="padding:10px 16px; font-size:.82rem;">
+            <i class="fa-solid fa-plus"></i> Tambah
+          </button>
+        </div>
+        <div class="tools-grid" id="jasa-grid"></div>
+        <div class="empty-state" id="jasa-empty-state">
+          <div class="empty-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+          <h3 id="jasa-empty-title">Belum Ada Jasa Terdaftar</h3>
+          <p id="jasa-empty-desc">Mulai dengan menambahkan layanan jasa pertama Anda.</p>
+          <button class="btn btn-primary" onclick="switchJasaPage('form')">
+            <i class="fa-solid fa-circle-plus"></i> Tambah Jasa Pertama
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- MODAL HAPUS -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <div class="modal-icon"><i class="fa-solid fa-trash-can"></i></div>
+    <h3 id="modal-title">Hapus Data Ini?</h3>
+    <p>Tindakan ini tidak dapat dibatalkan. <strong id="modal-item-name">—</strong> akan dihapus permanen.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeDeleteModal()">
+        <i class="fa-solid fa-xmark"></i> Batal
+      </button>
+      <button class="btn btn-danger" id="btn-confirm-delete">
+        <i class="fa-solid fa-trash-can"></i> Ya, Hapus
+      </button>
+    </div>
+  </div>
+</div>
+
+<footer style="text-align:center; padding:24px 0 8px; color:#98a2b3; font-size:.75rem;">
+  &copy; <span id="footer-year"></span> Tool &amp; Service Inventory. All rights reserved.
+</footer>
+
+<script>
+/* ============================================================
+   STORAGE KEYS
+============================================================ */
+var STORAGE_TOOLS = 'tool_inventory_tools_v1';
+var STORAGE_SERVICES = 'tool_inventory_services_v1';
+
+/* ============================================================
+   STATE
+============================================================ */
+var tools = [];
+var services = [];
+var currentEditId = null;
+var currentImageData = null;
+var currentFilter = 'Semua';
+var searchQuery = '';
+var currentJasaEditId = null;
+var currentJasaImageData = null;
+var currentJasaFilter = 'Semua';
+var jasaSearchQuery = '';
+var pendingDeleteId = null;
+var pendingDeleteType = null;
+
+/* ============================================================
+   SAMPLE DATA
+============================================================ */
+var SAMPLE_TOOLS = [
+  { id:'tool-1', name:'Tang Kombinasi 8"', category:'Alat Tangan', brand:'Tekiro', quantity:3, condition:'Baik', location:'Lemari A - Rak 1', notes:'Kondisi bagus.', image:null, createdAt:new Date().toISOString() },
+  { id:'tool-2', name:'Bor Listrik Impact', category:'Alat Listrik', brand:'Bosch GSB 550', quantity:1, condition:'Baik', location:'Lemari B - Rak 2', notes:'Termasuk mata bor.', image:null, createdAt:new Date().toISOString() },
+  { id:'tool-3', name:'Meteran 5 Meter', category:'Alat Ukur', brand:'Krisbow', quantity:2, condition:'Perbaikan', location:'Lemari A - Rak 3', notes:'Pita sering nyangkut.', image:null, createdAt:new Date().toISOString() }
+];
+var SAMPLE_SERVICES = [
+  { id:'svc-1', name:'Servis Bor Listrik', category:'Perbaikan Alat', technician:'Pak Budi', price:75000, unit:'per unit', status:'Tersedia', location:'Workshop Utama', duration:'1-2 jam', notes:'', image:null, createdAt:new Date().toISOString() },
+  { id:'svc-2', name:'Instalasi Panel Listrik', category:'Instalasi', technician:'Tim Elektro Jaya', price:750000, unit:'per proyek', status:'Booking', location:'On-site', duration:'1 hari', notes:'', image:null, createdAt:new Date().toISOString() },
+  { id:'svc-3', name:'Konsultasi Desain Workshop', category:'Konsultasi', technician:'Ir. Ahmad', price:150000, unit:'per jam', status:'Tersedia', location:'Online / On-site', duration:'1 jam', notes:'', image:null, createdAt:new Date().toISOString() }
+];
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+  loadData();
+  setupImageUpload('alat');
+  setupImageUpload('jasa');
+  renderAll();
+  renderJasaAll();
+});
+
+/* ============================================================
+   STORAGE
+============================================================ */
+function loadData() {
+  try {
+    var t = localStorage.getItem(STORAGE_TOOLS);
+    if (t) {
+      tools = JSON.parse(t);
+      if (!Array.isArray(tools)) tools = [];
+    } else {
+      tools = JSON.parse(JSON.stringify(SAMPLE_TOOLS));
+      saveTools();
+    }
+  } catch (e) {
+    console.error('load tools:', e);
+    tools = JSON.parse(JSON.stringify(SAMPLE_TOOLS));
+  }
+
+  try {
+    var s = localStorage.getItem(STORAGE_SERVICES);
+    if (s) {
+      services = JSON.parse(s);
+      if (!Array.isArray(services)) services = [];
+    } else {
+      services = JSON.parse(JSON.stringify(SAMPLE_SERVICES));
+      saveServices();
+    }
+  } catch (e) {
+    console.error('load services:', e);
+    services = JSON.parse(JSON.stringify(SAMPLE_SERVICES));
+  }
+}
+
+function saveTools() {
+  try {
+    localStorage.setItem(STORAGE_TOOLS, JSON.stringify(tools));
+    return true;
+  } catch (e) {
+    console.error('saveTools:', e);
+    showToast('danger', 'Gagal Menyimpan', 'Penyimpanan browser penuh.');
+    return false;
+  }
+}
+
+function saveServices() {
+  try {
+    localStorage.setItem(STORAGE_SERVICES, JSON.stringify(services));
+    return true;
+  } catch (e) {
+    console.error('saveServices:', e);
+    showToast('danger', 'Gagal Menyimpan', 'Penyimpanan browser penuh.');
+    return false;
+  }
+}
+
+/* ============================================================
+   TAB NAVIGATION
+============================================================ */
+function switchMainTab(tab) {
+  document.getElementById('main-tab-alat').classList.toggle('active', tab === 'alat');
+  document.getElementById('main-tab-jasa').classList.toggle('active', tab === 'jasa');
+  document.getElementById('section-alat').style.display = (tab === 'alat') ? 'block' : 'none';
+  document.getElementById('section-jasa').style.display = (tab === 'jasa') ? 'block' : 'none';
+  document.getElementById('sub-tabs-alat').style.display = (tab === 'alat') ? 'flex' : 'none';
+  document.getElementById('sub-tabs-jasa').style.display = (tab === 'jasa') ? 'flex' : 'none';
+
+  if (tab === 'alat') switchAlatPage('form');
+  else switchJasaPage('form');
+}
+
+function switchAlatPage(page) {
+  document.getElementById('alat-page-form').classList.toggle('active', page === 'form');
+  document.getElementById('alat-page-view').classList.toggle('active', page === 'view');
+  document.getElementById('sub-alat-form').classList.toggle('active', page === 'form');
+  document.getElementById('sub-alat-view').classList.toggle('active', page === 'view');
+  if (page === 'view') renderToolList();
+}
+
+function switchJasaPage(page) {
+  document.getElementById('jasa-page-form').classList.toggle('active', page === 'form');
+  document.getElementById('jasa-page-view').classList.toggle('active', page === 'view');
+  document.getElementById('sub-jasa-form').classList.toggle('active', page === 'form');
+  document.getElementById('sub-jasa-view').classList.toggle('active', page === 'view');
+  if (page === 'view') renderJasaList();
+}
+
+/* ============================================================
+   UPLOAD IMAGE
+============================================================ */
+function setupImageUpload(type) {
+  var isAlat = type === 'alat';
+  var input = document.getElementById(isAlat ? 'input-image' : 'jasa-input-image');
+  var preview = document.getElementById(isAlat ? 'img-preview' : 'jasa-img-preview');
+  var clearBtn = document.getElementById(isAlat ? 'btn-clear-img' : 'jasa-btn-clear-img');
+
+  if (!input || !preview || !clearBtn) return;
+
+  input.addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('danger', 'Format Salah', 'File harus berupa gambar.');
+      input.value = '';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('danger', 'Terlalu Besar', 'Ukuran maks 2MB.');
+      input.value = '';
+      return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      if (isAlat) currentImageData = ev.target.result;
+      else currentJasaImageData = ev.target.result;
+      preview.src = ev.target.result;
+      preview.classList.add('show');
+      clearBtn.classList.add('show');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  clearBtn.addEventListener('click', function() { clearImage(type); });
+}
+
+function clearImage(type) {
+  var isAlat = type === 'alat';
+  var input = document.getElementById(isAlat ? 'input-image' : 'jasa-input-image');
+  var preview = document.getElementById(isAlat ? 'img-preview' : 'jasa-img-preview');
+  var clearBtn = document.getElementById(isAlat ? 'btn-clear-img' : 'jasa-btn-clear-img');
+
+  if (isAlat) currentImageData = null;
+  else currentJasaImageData = null;
+
+  if (input) input.value = '';
+  if (preview) { preview.src = ''; preview.classList.remove('show'); }
+  if (clearBtn) clearBtn.classList.remove('show');
+}
+
+/* ============================================================
+   SUBMIT ALAT
+============================================================ */
+function handleSubmit(e) {
+  e.preventDefault();
+
+  var name = document.getElementById('input-name').value.trim();
+  var category = document.getElementById('input-category').value;
+  var brand = document.getElementById('input-brand').value.trim();
+  var quantity = parseInt(document.getElementById('input-quantity').value) || 1;
+  var condition = document.getElementById('input-condition').value;
+  var location = document.getElementById('input-location').value.trim();
+  var notes = document.getElementById('input-notes').value.trim();
+  var editId = document.getElementById('edit-id').value;
+
+  if (!name || !category || !condition) {
+    showToast('danger', 'Data Belum Lengkap', 'Nama, kategori, dan kondisi wajib diisi.');
+    return;
+  }
+
+  if (editId) {
+    var idx = -1;
+    for (var i = 0; i < tools.length; i++) { if (tools[i].id === editId) { idx = i; break; } }
+    if (idx !== -1) {
+      tools[idx].name = name;
+      tools[idx].category = category;
+      tools[idx].brand = brand;
+      tools[idx].quantity = quantity;
+      tools[idx].condition = condition;
+      tools[idx].location = location;
+      tools[idx].notes = notes;
+      tools[idx].image = currentImageData;
+      tools[idx].updatedAt = new Date().toISOString();
+      showToast('success', 'Berhasil Diperbarui!', '"' + name + '" telah di-update.');
+    }
+  } else {
+    tools.unshift({
+      id: 'tool-' + Date.now(),
+      name: name, category: category, brand: brand, quantity: quantity,
+      condition: condition, location: location, notes: notes,
+      image: currentImageData, createdAt: new Date().toISOString()
+    });
+    showToast('success', 'Alat Ditambahkan!', '"' + name + '" berhasil disimpan.');
+  }
+
+  if (saveTools()) {
+    resetFormFully();
+    renderAll();
+    switchAlatPage('view');
+  }
+}
+
+/* ============================================================
+   EDIT ALAT
+============================================================ */
+function startEdit(id) {
+  var tool = null;
+  for (var i = 0; i < tools.length; i++) { if (tools[i].id === id) { tool = tools[i]; break; } }
+  if (!tool) return;
+  currentEditId = id;
+
+  document.getElementById('edit-id').value = tool.id;
+  document.getElementById('input-name').value = tool.name;
+  document.getElementById('input-category').value = tool.category;
+  document.getElementById('input-brand').value = tool.brand || '';
+  document.getElementById('input-quantity').value = tool.quantity || 1;
+  document.getElementById('input-condition').value = tool.condition;
+  document.getElementById('input-location').value = tool.location || '';
+  document.getElementById('input-notes').value = tool.notes || '';
+
+  if (tool.image) {
+    currentImageData = tool.image;
+    var p = document.getElementById('img-preview');
+    p.src = tool.image;
+    p.classList.add('show');
+    document.getElementById('btn-clear-img').classList.add('show');
+  } else {
+    clearImage('alat');
+  }
+
+  document.getElementById('alat-form-title').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Alat';
+  document.getElementById('alat-form-subtitle').innerText = 'Sedang mengedit: ' + tool.name;
+  document.getElementById('btn-submit-text').innerText = 'Update Alat';
+  document.getElementById('btn-cancel').style.display = 'inline-flex';
+
+  switchAlatPage('form');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelEdit() { resetFormFully(); switchAlatPage('view'); }
+
+function resetFormFully() {
+  document.getElementById('tool-form').reset();
+  document.getElementById('edit-id').value = '';
+  document.getElementById('input-quantity').value = 1;
+  currentEditId = null;
+  clearImage('alat');
+  document.getElementById('alat-form-title').innerHTML = '<i class="fa-solid fa-circle-plus"></i> Tambah Alat Baru';
+  document.getElementById('alat-form-subtitle').innerText = 'Isi data alat perkakas dengan lengkap';
+  document.getElementById('btn-submit-text').innerText = 'Simpan Alat';
+  document.getElementById('btn-cancel').style.display = 'none';
+}
+
+/* ============================================================
+   SUBMIT JASA
+============================================================ */
+function handleJasaSubmit(e) {
+  e.preventDefault();
+
+  var name = document.getElementById('jasa-name').value.trim();
+  var category = document.getElementById('jasa-category').value;
+  var technician = document.getElementById('jasa-technician').value.trim();
+  var price = parseInt(document.getElementById('jasa-price').value) || 0;
+  var unit = document.getElementById('jasa-unit').value;
+  var status = document.getElementById('jasa-status').value;
+  var location = document.getElementById('jasa-location').value.trim();
+  var duration = document.getElementById('jasa-duration').value.trim();
+  var notes = document.getElementById('jasa-notes').value.trim();
+  var editId = document.getElementById('jasa-edit-id').value;
+
+  if (!name || !category || !status || price <= 0) {
+    showToast('danger', 'Data Belum Lengkap', 'Nama, kategori, harga (>0), dan status wajib diisi.');
+    return;
+  }
+
+  if (editId) {
+    var idx = -1;
+    for (var i = 0; i < services.length; i++) { if (services[i].id === editId) { idx = i; break; } }
+    if (idx !== -1) {
+      services[idx].name = name;
+      services[idx].category = category;
+      services[idx].technician = technician;
+      services[idx].price = price;
+      services[idx].unit = unit;
+      services[idx].status = status;
+      services[idx].location = location;
+      services[idx].duration = duration;
+      services[idx].notes = notes;
+      services[idx].image = currentJasaImageData;
+      services[idx].updatedAt = new Date().toISOString();
+      showToast('success', 'Berhasil Diperbarui!', 'Jasa "' + name + '" telah di-update.');
+    }
+  } else {
+    services.unshift({
+      id: 'svc-' + Date.now(),
+      name: name, category: category, technician: technician, price: price,
+      unit: unit, status: status, location: location, duration: duration,
+      notes: notes, image: currentJasaImageData, createdAt: new Date().toISOString()
+    });
+    showToast('success', 'Jasa Ditambahkan!', '"' + name + '" berhasil disimpan.');
+  }
+
+  if (saveServices()) {
+    resetJasaForm();
+    renderJasaAll();
+    switchJasaPage('view');
+  }
+}
+
+/* ============================================================
+   EDIT JASA
+============================================================ */
+function startJasaEdit(id) {
+  var svc = null;
+  for (var i = 0; i < services.length; i++) { if (services[i].id === id) { svc = services[i]; break; } }
+  if (!svc) return;
+  currentJasaEditId = id;
+
+  document.getElementById('jasa-edit-id').value = svc.id;
+  document.getElementById('jasa-name').value = svc.name;
+  document.getElementById('jasa-category').value = svc.category;
+  document.getElementById('jasa-technician').value = svc.technician || '';
+  document.getElementById('jasa-price').value = svc.price || 0;
+  document.getElementById('jasa-unit').value = svc.unit || 'per unit';
+  document.getElementById('jasa-status').value = svc.status;
+  document.getElementById('jasa-location').value = svc.location || '';
+  document.getElementById('jasa-duration').value = svc.duration || '';
+  document.getElementById('jasa-notes').value = svc.notes || '';
+
+  if (svc.image) {
+    currentJasaImageData = svc.image;
+    var p = document.getElementById('jasa-img-preview');
+    p.src = svc.image;
+    p.classList.add('show');
+    document.getElementById('jasa-btn-clear-img').classList.add('show');
+  } else {
+    clearImage('jasa');
+  }
+
+  document.getElementById('jasa-form-title').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit Jasa';
+  document.getElementById('jasa-form-subtitle').innerText = 'Sedang mengedit: ' + svc.name;
+  document.getElementById('jasa-btn-submit-text').innerText = 'Update Jasa';
+  document.getElementById('jasa-btn-cancel').style.display = 'inline-flex';
+
+  switchJasaPage('form');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelJasaEdit() { resetJasaForm(); switchJasaPage('view'); }
+
+function resetJasaForm() {
+  document.getElementById('jasa-form').reset();
+  document.getElementById('jasa-edit-id').value = '';
+  currentJasaEditId = null;
+  clearImage('jasa');
+  document.getElementById('jasa-form-title').innerHTML = '<i class="fa-solid fa-circle-plus"></i> Tambah Jasa Baru';
+  document.getElementById('jasa-form-subtitle').innerText = 'Isi data layanan jasa dengan lengkap';
+  document.getElementById('jasa-btn-submit-text').innerText = 'Simpan Jasa';
+  document.getElementById('jasa-btn-cancel').style.display = 'none';
+}
+
+/* ============================================================
+   DELETE
+============================================================ */
+function openDeleteModal(id, type) {
+  var item = null;
+  if (type === 'alat') {
+    for (var i = 0; i < tools.length; i++) { if (tools[i].id === id) { item = tools[i]; break; } }
+  } else {
+    for (var j = 0; j < services.length; j++) { if (services[j].id === id) { item = services[j]; break; } }
+  }
+  if (!item) return;
+
+  pendingDeleteId = id;
+  pendingDeleteType = type;
+
+  document.getElementById('modal-title').innerText = (type === 'alat') ? 'Hapus Alat Ini?' : 'Hapus Jasa Ini?';
+  document.getElementById('modal-item-name').innerText = item.name;
+  document.getElementById('modal-delete').classList.add('show');
+  document.getElementById('btn-confirm-delete').onclick = confirmDelete;
+}
+
+function closeDeleteModal() {
+  document.getElementById('modal-delete').classList.remove('show');
+  pendingDeleteId = null;
+  pendingDeleteType = null;
+}
+
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+
+  if (pendingDeleteType === 'alat') {
+    var name = '';
+    tools = tools.filter(function(t) {
+      if (t.id === pendingDeleteId) { name = t.name; return false; }
+      return true;
+    });
+    saveTools();
+    renderAll();
+    showToast('info', 'Alat Dihapus', '"' + name + '" telah dihapus.');
+  } else {
+    var nameS = '';
+    services = services.filter(function(s) {
+      if (s.id === pendingDeleteId) { nameS = s.name; return false; }
+      return true;
+    });
+    saveServices();
+    renderJasaAll();
+    showToast('info', 'Jasa Dihapus', '"' + nameS + '" telah dihapus.');
+  }
+  closeDeleteModal();
+}
+
+/* ============================================================
+   SEARCH & FILTER
+============================================================ */
+function handleSearch() {
+  searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+  renderToolList();
+}
+function setFilter(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.chip[data-filter]').forEach(function(c) {
+    c.classList.toggle('active', c.dataset.filter === filter);
+  });
+  renderToolList();
+}
+function getFilteredTools() {
+  return tools.filter(function(t) {
+    var matchFilter = (currentFilter === 'Semua') || (t.condition === currentFilter);
+    var q = searchQuery;
+    var matchSearch = !q ||
+      (t.name || '').toLowerCase().indexOf(q) !== -1 ||
+      (t.brand || '').toLowerCase().indexOf(q) !== -1 ||
+      (t.location || '').toLowerCase().indexOf(q) !== -1;
+    return matchFilter && matchSearch;
+  });
+}
+
+function handleJasaSearch() {
+  jasaSearchQuery = document.getElementById('jasa-search-input').value.toLowerCase().trim();
+  renderJasaList();
+}
+function setJasaFilter(filter) {
+  currentJasaFilter = filter;
+  document.querySelectorAll('.chip[data-jasa-filter]').forEach(function(c) {
+    c.classList.toggle('active', c.dataset.jasaFilter === filter);
+  });
+  renderJasaList();
+}
+function getFilteredServices() {
+  return services.filter(function(s) {
+    var matchFilter = (currentJasaFilter === 'Semua') || (s.status === currentJasaFilter);
+    var q = jasaSearchQuery;
+    var matchSearch = !q ||
+      (s.name || '').toLowerCase().indexOf(q) !== -1 ||
+      (s.technician || '').toLowerCase().indexOf(q) !== -1 ||
+      (s.category || '').toLowerCase().indexOf(q) !== -1;
+    return matchFilter && matchSearch;
+  });
+}
+
+/* ============================================================
+   RENDER
+============================================================ */
+function renderAll() {
+  renderStats();
+  renderToolList();
+  updateCounts();
+}
+
+function renderJasaAll() {
+  renderJasaList();
+  updateCounts();
+}
+
+function updateCounts() {
+  document.getElementById('count-alat').innerText = tools.length;
+  document.getElementById('count-jasa').innerText = services.length;
+  document.getElementById('tab-count-alat').innerText = tools.length;
+  document.getElementById('tab-count-jasa').innerText = services.length;
+}
+
+function renderStats() {
+  document.getElementById('stat-total').innerText = tools.length;
+  var baik = 0, rusak = 0;
+  for (var i = 0; i < tools.length; i++) {
+    if (tools[i].condition === 'Baik') baik++;
+    if (tools[i].condition === 'Rusak') rusak++;
+  }
+  document.getElementById('stat-baik').innerText = baik;
+  document.getElementById('stat-rusak').innerText = rusak;
+}
+
+function renderToolList() {
+  var grid = document.getElementById('tools-grid');
+  var emptyState = document.getElementById('empty-state');
+  var filtered = getFilteredTools();
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    grid.style.display = 'none';
+    emptyState.classList.add('show');
+    if (tools.length === 0) {
+      document.getElementById('empty-title').innerText = 'Belum Ada Alat Terdaftar';
+      document.getElementById('empty-desc').innerText = 'Mulai dengan menambahkan alat perkakas pertama Anda.';
+    } else {
+      document.getElementById('empty-title').innerText = 'Tidak Ada Hasil';
+      document.getElementById('empty-desc').innerText = 'Coba ubah filter atau kata kunci pencarian.';
+    }
+    return;
+  }
+
+  grid.style.display = 'grid';
+  emptyState.classList.remove('show');
+
+  var html = '';
+  filtered.forEach(function(tool) {
+    var badgeClass = getConditionBadgeClass(tool.condition);
+    var imageHtml = tool.image
+      ? '<img src="' + tool.image + '" alt="">'
+      : '<div class="placeholder"><i class="fa-solid fa-screwdriver-wrench"></i></div>';
+
+    html += '<div class="tool-card">'
+      + '<div class="tool-image">' + imageHtml
+      + '<span class="tool-badge ' + badgeClass + '">' + escapeHtml(tool.condition) + '</span></div>'
+      + '<div class="tool-body">'
+      + '<div class="tool-name">' + escapeHtml(tool.name) + '</div>'
+      + '<div class="tool-category"><i class="fa-solid fa-tag"></i> ' + escapeHtml(tool.category) + '</div>'
+      + '<div class="tool-info">'
+      + (tool.brand ? '<span><i class="fa-solid fa-industry"></i> ' + escapeHtml(tool.brand) + '</span>' : '')
+      + '<span><i class="fa-solid fa-cubes"></i> Stok: <strong>' + tool.quantity + '</strong> unit</span>'
+      + (tool.location ? '<span><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(tool.location) + '</span>' : '')
+      + '</div></div>'
+      + '<div class="tool-actions">'
+      + '<button class="btn-card btn-edit" onclick="startEdit(\'' + tool.id + '\')"><i class="fa-solid fa-pen"></i> Edit</button>'
+      + '<button class="btn-card btn-delete" onclick="openDeleteModal(\'' + tool.id + '\', \'alat\')"><i class="fa-solid fa-trash"></i> Hapus</button>'
+      + '</div></div>';
+  });
+  grid.innerHTML = html;
+}
+
+function renderJasaList() {
+  var grid = document.getElementById('jasa-grid');
+  var emptyState = document.getElementById('jasa-empty-state');
+  var filtered = getFilteredServices();
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    grid.style.display = 'none';
+    emptyState.classList.add('show');
+    if (services.length === 0) {
+      document.getElementById('jasa-empty-title').innerText = 'Belum Ada Jasa Terdaftar';
+      document.getElementById('jasa-empty-desc').innerText = 'Mulai dengan menambahkan layanan jasa pertama Anda.';
+    } else {
+      document.getElementById('jasa-empty-title').innerText = 'Tidak Ada Hasil';
+      document.getElementById('jasa-empty-desc').innerText = 'Coba ubah filter atau kata kunci pencarian.';
+    }
+    return;
+  }
+
+  grid.style.display = 'grid';
+  emptyState.classList.remove('show');
+
+  var html = '';
+  filtered.forEach(function(svc) {
+    var badgeClass = getJasaStatusBadgeClass(svc.status);
+    var imageHtml = svc.image
+      ? '<img src="' + svc.image + '" alt="">'
+      : '<div class="placeholder"><i class="fa-solid fa-hand-holding-dollar"></i></div>';
+    var priceFormatted = 'Rp ' + (svc.price || 0).toLocaleString('id-ID');
+
+    html += '<div class="tool-card">'
+      + '<div class="tool-image">' + imageHtml
+      + '<span class="tool-badge ' + badgeClass + '">' + escapeHtml(svc.status) + '</span></div>'
+      + '<div class="tool-body">'
+      + '<div class="tool-name">' + escapeHtml(svc.name) + '</div>'
+      + '<div class="tool-category"><i class="fa-solid fa-tag"></i> ' + escapeHtml(svc.category) + '</div>'
+      + '<div class="tool-price">' + priceFormatted + ' <small>' + escapeHtml(svc.unit || '') + '</small></div>'
+      + '<div class="tool-info">'
+      + (svc.technician ? '<span><i class="fa-solid fa-user-gear"></i> ' + escapeHtml(svc.technician) + '</span>' : '')
+      + (svc.duration ? '<span><i class="fa-regular fa-clock"></i> ' + escapeHtml(svc.duration) + '</span>' : '')
+      + (svc.location ? '<span><i class="fa-solid fa-location-dot"></i> ' + escapeHtml(svc.location) + '</span>' : '')
+      + '</div></div>'
+      + '<div class="tool-actions">'
+      + '<button class="btn-card btn-edit" onclick="startJasaEdit(\'' + svc.id + '\')"><i class="fa-solid fa-pen"></i> Edit</button>'
+      + '<button class="btn-card btn-delete" onclick="openDeleteModal(\'' + svc.id + '\', \'jasa\')"><i class="fa-solid fa-trash"></i> Hapus</button>'
+      + '</div></div>';
+  });
+  grid.innerHTML = html;
+}
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function getConditionBadgeClass(c) {
+  if (c === 'Baik') return 'badge-baik';
+  if (c === 'Rusak') return 'badge-rusak';
+  if (c === 'Perbaikan') return 'badge-perbaikan';
+  return 'badge-baik';
+}
+function getJasaStatusBadgeClass(s) {
+  if (s === 'Tersedia') return 'badge-tersedia';
+  if (s === 'Booking') return 'badge-booking';
+  if (s === 'Libur') return 'badge-libur';
+  return 'badge-tersedia';
+}
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+function showToast(type, title, message) {
+  var wrap = document.getElementById('toast-wrap');
+  if (!wrap) return;
+  var toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+
+  var iconMap = { success: 'fa-circle-check', danger: 'fa-circle-exclamation', info: 'fa-circle-info' };
+  var icon = iconMap[type] || 'fa-circle-info';
+
+  toast.innerHTML = '<div class="icon"><i class="fa-solid ' + icon + '"></i></div>'
+    + '<div class="msg">' + escapeHtml(title) + '<small>' + escapeHtml(message) + '</small></div>';
+
+  wrap.appendChild(toast);
+  setTimeout(function() {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    toast.style.transition = 'all .3s';
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 3200);
+}
+
+/* ============================================================
+   MODAL CLOSE ON OVERLAY CLICK
+============================================================ */
+document.getElementById('modal-delete').addEventListener('click', function(e) {
+  if (e.target.id === 'modal-delete') closeDeleteModal();
+});
+</script>
+</body>
+</html>
